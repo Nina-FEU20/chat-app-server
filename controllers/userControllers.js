@@ -2,11 +2,21 @@ const User = require('../models/userModel');
 var bcrypt = require('bcryptjs');
 
 const createUser = async(req, res) => {
-    const { username, password } = req.body
+    const { username, password, confirmPassword } = req.body
 
-    if(!username || !password) return res.status(400).json({ error: "Name and password is required"})
+    if(!username || !password || !confirmPassword) { 
+        return res.status(400).send("All fields are required") 
+    }
 
-    if(await User.exists({ username })) return res.status(400).send({error: "User already exists"})
+    if (password !== confirmPassword) {
+        return res.status(400).send("Passwords do not match") 
+      }
+
+    if(password.length < 6){
+        return res.status(400).send("Password must be atleast 6 characters") 
+    }
+
+    if(await User.exists({ username })) return res.status(400).send("User already exists")
 
     const hashedPassword = await bcrypt.hash(req.body.password, saltRounds = 10);
 
