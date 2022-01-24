@@ -2,22 +2,10 @@ const User = require('../models/userModel');
 var bcrypt = require('bcryptjs');
 
 const createUser = async(req, res) => {
-    const { username, password, confirmPassword } = req.body
+    const { username, password } = req.body
 
-    if(!username || !password || !confirmPassword) { 
+    if(!username || !password) { 
         return res.status(400).send("All fields are required") 
-    }
-
-    if (password !== confirmPassword) {
-        return res.status(400).send(  "Passwords do not match" ) 
-      }
-
-    if(password.length < 6){
-        return res.status(400).send("Password must be atleast 6 characters") 
-    }
-
-    if(username.length < 6){
-        return res.status(400).send("Username must be atleast 4 characters") 
     }
 
     if(await User.exists({ username })) return res.status(400).send("User already exists")
@@ -47,7 +35,7 @@ const loginUser = async(req, res) => {
     if (!correctPassword) return res.status(400).send("Invalid username or password")
 
     if(user) res.status(200).json({ id: user._id, username: user.username })
-    else res.status(400).json("Something went wrong")
+    else res.status(400).json("Something went wrong, try again or come back later")
 
 }
 
@@ -66,7 +54,7 @@ const getSingleUser = async(req, res) => {
         const user = await User.find({ _id: req.params.id }, {username: 1, _id: 1})
         res.status(200).json(user)
     } catch(err){
-        return res.status(400).json({ error: err })
+        return res.status(400).json("Something went wrong, try again or come back later")
     }
 }
 
