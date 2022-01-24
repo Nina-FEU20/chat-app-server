@@ -9,11 +9,15 @@ const createUser = async(req, res) => {
     }
 
     if (password !== confirmPassword) {
-        return res.status(400).send("Passwords do not match") 
+        return res.status(400).send(  "Passwords do not match" ) 
       }
 
     if(password.length < 6){
         return res.status(400).send("Password must be atleast 6 characters") 
+    }
+
+    if(username.length < 6){
+        return res.status(400).send("Username must be atleast 4 characters") 
     }
 
     if(await User.exists({ username })) return res.status(400).send("User already exists")
@@ -28,7 +32,7 @@ const createUser = async(req, res) => {
    
         res.status(201).json({ id: user._id, username: user.username })
     } catch(err){
-        res.status(400).json({error: err})
+        res.status(400).json("Something went wrong, try again or come back later")
     }
 
 }
@@ -43,7 +47,7 @@ const loginUser = async(req, res) => {
     if (!correctPassword) return res.status(400).send("Invalid username or password")
 
     if(user) res.status(200).json({ id: user._id, username: user.username })
-    else res.status(400).json({error: "Something went wrong"})
+    else res.status(400).json("Something went wrong")
 
 }
 
@@ -52,7 +56,7 @@ const getAllUsers = async(req, res) => {
         const allUsers = await User.find({}, {username: 1, _id: 1})
         res.status(200).json(allUsers)
     } catch(err){
-        return res.status(400).json({ error: err })
+        return res.status(400).json("Something went wrong, try again or come back later")
     }
 }
 
