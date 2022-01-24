@@ -1,18 +1,19 @@
 const mongoose = require('mongoose')
 
 const userSchema = mongoose.Schema({
-    name: {
+    username: {
         type: String,
-        required: [true, 'Name is required'],
-        match: [/^[a-zA-Z\s]*$/, 'Alphabetical characters only']
+        unique: true,
+        required: [true, 'Username is required'],
+        minLength: [4, 'Usernames require minimum of 4 characters'],
+        maxLength: [24, 'Usernames require maximum of 24 characters'],
     },
     password: {
         type: String,
         required: [true, 'Password is required'],
-        min: [8, 'Password require minimum of 8 characters'],
-
+        minLength: [6, 'Password require minimum of 6 characters'],
     },
-    isOnline: { type: Boolean, required: true, default: false}
+    // isOnline: { type: Boolean, required: true, default: false}
 }, 
 { timestamps: true }
 )
