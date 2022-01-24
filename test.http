@@ -17,3 +17,9 @@ Content-Type: application/json
     "username": "testUserThree",    
     "password": "123456"
 }
+
+### Get all users
+GET http://localhost:5000/api/user HTTP/1.1
+
+### Get single user
+GET http://localhost:5000/api/user/61ee06142ce9392a507e467b HTTP/1.1
