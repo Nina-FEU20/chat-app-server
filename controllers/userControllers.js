@@ -19,7 +19,7 @@ const createUser = async(req, res) => {
             password: hashedPassword,
         })
 
-        const token = await createToken(user._id, res)
+        await createToken(user._id, res)
    
         res.status(201).json({ id: user._id, username: user.username })
     } catch(err){
@@ -37,7 +37,7 @@ const loginUser = async(req, res) => {
         if (!correctPassword || !user) return res.status(400).send("Invalid username or password")
 
         await createToken(user._id, res)
-
+    
         res.status(200).json({ id: user._id, username: user.username })
         
     } catch(err) {

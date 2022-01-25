@@ -1,16 +1,11 @@
 const jwt = require('jsonwebtoken')
 
 const createToken = async (id, res) => {
-
-    const payload = {
-        exp: Math.floor(Date.now() / 1000) + (60 * 60), // makes the token valid for one hour
-        id: id,
-    }
     
+    const maxAge = 3 * 24 * 60 * 60 // 3 days
     try {
-        const token = await jwt.sign(payload, process.env.JWT_SECRET)
-
-        res.cookie('auth-token', token)
+        const token = await jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: maxAge })
+        res.cookie('auth-token', token, { maxAge: maxAge * 1000, httpOnly: true })
         return token;
     } catch(err){
         console.log(err)
