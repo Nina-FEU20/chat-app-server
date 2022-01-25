@@ -1,5 +1,6 @@
 const User = require('../models/userModel');
 var bcrypt = require('bcryptjs');
+const { createToken } = require('../utils/createToken');
 
 const createUser = async(req, res) => {
     const { username, password } = req.body
@@ -17,6 +18,8 @@ const createUser = async(req, res) => {
             username, 
             password: hashedPassword,
         })
+
+        const token = await createToken(user._id, res)
    
         res.status(201).json({ id: user._id, username: user.username })
     } catch(err){
@@ -28,14 +31,18 @@ const createUser = async(req, res) => {
 const loginUser = async(req, res) => {
     const { username, password } = req.body
 
-    const user = await User.findOne({ username });
-    if (!user) return res.status(400).send("Invalid username or password")
+    try {
+        const user = await User.findOne({ username });
+        const correctPassword = await bcrypt.compare(password, user.password)
+        if (!correctPassword || !user) return res.status(400).send("Invalid username or password")
 
-    const correctPassword = await bcrypt.compare(password, user.password)
-    if (!correctPassword) return res.status(400).send("Invalid username or password")
+        await createToken(user._id, res)
 
-    if(user) res.status(200).json({ id: user._id, username: user.username })
-    else res.status(400).json("Something went wrong, try again or come back later")
+        res.status(200).json({ id: user._id, username: user.username })
+        
+    } catch(err) {
+        res.status(400).json(err)
+    }
 
 }
 
