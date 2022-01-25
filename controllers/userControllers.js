@@ -65,6 +65,17 @@ const getSingleUser = async(req, res) => {
     }
 }
 
+const logoutUser = async(req, res) => {
+ 
+    try{
+        res.cookie('jwt', "goodbye", { maxAge: 1, httpOnly: true })
+        res.send("cleared")
+    } catch(err) {
+        res.send(err)
+    }
+    
+}
 
 
-module.exports = { createUser, loginUser, getAllUsers, getSingleUser }
+
+module.exports = { createUser, loginUser, getAllUsers, getSingleUser, logoutUser }
