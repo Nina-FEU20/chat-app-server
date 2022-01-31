@@ -1,14 +1,12 @@
 const express = require('express');
-const { accessChat, createGroupChat, getChatById, getChatsForCurrentUser } = require('../controllers/chatControllers');
+const { getOrCreateOneOnOneChat, createGroupChat, getChatById, getChatsForCurrentUser } = require('../controllers/chatControllers');
 const { requireAuth } = require('../middleware/auth');
-
 
 const router = express.Router();
 
-// once testing is done, ALL these should have requireAuth
-router.route('/').post(accessChat);
-router.route('/group').post(createGroupChat)
-router.route('/:id').get(getChatById);
-router.route('/').get(getChatsForCurrentUser);
+router.post('/', requireAuth, getOrCreateOneOnOneChat)
+router.post('/group', requireAuth, createGroupChat)
+router.get('/:id', requireAuth, getChatById)
+router.route('/', requireAuth, getChatsForCurrentUser)
 
 module.exports = router;
