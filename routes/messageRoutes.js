@@ -1,11 +1,12 @@
 const express = require('express');
-const { sendMessage } = require('../controllers/messageControllers')
+const { sendMessage, getAllMessages } = require('../controllers/messageControllers')
 const { requireAuth } = require('../middleware/auth');
 
 
 const router = express.Router();
 
 // once testing is done, add requireAuth
-router.route('/').post(sendMessage);
+router.post('/', sendMessage);
+router.get('/:id', getAllMessages)
 
 module.exports = router;

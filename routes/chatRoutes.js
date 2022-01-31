@@ -8,7 +8,7 @@ const router = express.Router();
 // once testing is done, ALL these should have requireAuth
 router.route('/').post(accessChat);
 router.route('/group').post(createGroupChat)
-router.route('/group/:id').get(getChatById);
+router.route('/:id').get(getChatById);
 router.route('/').get(getChatsForCurrentUser);
 
 module.exports = router;
