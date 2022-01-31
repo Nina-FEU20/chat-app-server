@@ -4,7 +4,7 @@ const Message = require ('../models/messageModel');
 
 
 const getOrCreateOneOnOneChat = async (req, res) => {
-  const verifiedUserId = req.verifiedUser._id
+  const verifiedUserId = req.verifiedUser.id
   const { userId } = req.body;
 
   if (!userId) {
@@ -42,7 +42,7 @@ const createGroupChat = async (req, res) => {
     return res.status(400).send('Please add users and a groupname');
   }
 
-  const verifiedUserId = req.verifiedUser._id
+  const verifiedUserId = req.verifiedUser.id
 
   var users = JSON.parse(req.body.users);
 
@@ -75,9 +75,11 @@ const getChatById = async(req, res) => {
 }
 
 const getChatsForCurrentUser = async (req, res) => {
-  const verifiedUserId = req.verifiedUser._id
+  const verifiedUserId = req.verifiedUser.id
+
   try {
       const chats = await Chat.find({ users: { _id: verifiedUserId }}).populate('users', '-password')
+
       res.status(200).json(chats)
   } catch (error) {
     res.status(400).json(error.message);

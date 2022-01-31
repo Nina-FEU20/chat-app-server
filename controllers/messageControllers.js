@@ -5,7 +5,7 @@ const Chat = require('../models/chatModel');
 
 const sendMessage = async (req, res) => {
   const { content, chatId } = req.body;
-  const verifiedUserId = req.verifiedUser._id
+  const verifiedUserId = req.verifiedUser.id
 
   if (!content || !chatId) {
     return res.status(400).send('Need content and chatId to send Message');
