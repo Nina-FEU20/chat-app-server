@@ -68,7 +68,7 @@ const getSingleUser = async(req, res) => {
 const searchUser = async(req, res) => {
 
     try{
-        const users = await User.find({ username: { $regex: req.params.search, $options: 'i' } }, {username: 1, _id: 1})
+        const users = await User.find({ username: { $regex: req.params.search, $options: 'i' }, _id: { $ne: req.verifiedUser.id}}, {username: 1, _id: 1})
         res.status(200).json(users)
     } catch(err){
         return res.status(400).json(err.message)
