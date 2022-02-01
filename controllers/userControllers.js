@@ -65,6 +65,16 @@ const getSingleUser = async(req, res) => {
     }
 }
 
+const searchUser = async(req, res) => {
+
+    try{
+        const users = await User.find({ username: { $regex: req.params.search, $options: 'i' } }, {username: 1, _id: 1})
+        res.status(200).json(users)
+    } catch(err){
+        return res.status(400).json(err.message)
+    }
+}
+
 const logoutUser = async(req, res) => {
  
     try{
@@ -78,4 +88,4 @@ const logoutUser = async(req, res) => {
 
 
 
-module.exports = { createUser, loginUser, getAllUsers, getSingleUser, logoutUser }
+module.exports = { createUser, loginUser, getAllUsers, getSingleUser, logoutUser, searchUser }
