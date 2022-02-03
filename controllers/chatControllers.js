@@ -1,21 +1,19 @@
 const Chat = require('../models/chatModel');
 const User = require('../models/userModel');
-const Message = require ('../models/messageModel');
-
+const Message = require('../models/messageModel');
 
 const getOrCreateOneOnOneChat = async (req, res) => {
-  const verifiedUserId = req.verifiedUser.id
-  const { userId } = req.body;
+  const verifiedUserId = req.verifiedUser.id;
+  const { user } = req.body;
 
-  if (!userId) {
+  if (!user) {
     return res.status(400).send('UserId param not sent with request');
   }
 
   var isChat = await Chat.find({
     isGroupChat: false,
-    $and: [{ users: { _id: verifiedUserId} }, { users: { _id: userId } } ],
-  })
-  .populate('users', '-password')
+    $and: [{ users: { _id: verifiedUserId } }, { users: { _id: user._id } }],
+  }).populate('users', '-password');
 
   if (isChat.length > 0) {
     res.status(200).send(isChat[0]);
@@ -23,7 +21,7 @@ const getOrCreateOneOnOneChat = async (req, res) => {
     const newChat = {
       chatName: '',
       isGroupChat: false,
-      users: [verifiedUserId, userId],
+      users: [verifiedUserId, user._id],
     };
 
     try {
@@ -36,26 +34,25 @@ const getOrCreateOneOnOneChat = async (req, res) => {
   }
 };
 
-
 const createGroupChat = async (req, res) => {
-  if (!req.body.users || !req.body.name) {
-    return res.status(400).send('Please add users and a groupname');
+  if (!req.body.users) {
+    return res.status(400).send('Please add users');
   }
 
-  const verifiedUserId = req.verifiedUser.id
+  const verifiedUserId = req.verifiedUser.id;
 
-  var users = JSON.parse(req.body.users);
+  let users = req.body.users;
 
   users.push(verifiedUserId);
 
   try {
     const groupChat = await Chat.create({
-      chatName: req.body.name,
+      chatName: req.body.name || '',
       users: users,
       isGroupChat: true,
     });
 
-    const fullGroupChat = await Chat.findOne({ _id: groupChat._id }).populate('users', '-password')
+    const fullGroupChat = await Chat.findOne({ _id: groupChat._id }).populate('users', '-password');
 
     res.status(200).json(fullGroupChat);
   } catch (error) {
@@ -63,33 +60,32 @@ const createGroupChat = async (req, res) => {
   }
 };
 
-const getChatById = async(req, res) => {
-    const id = req.params.id
-
-    try{
-        const chat = await Chat.findOne({ _id: id }).populate('users', '-password')
-        res.status(200).json(chat)
-    } catch(error){
-        res.status(400).send(error.message)
-    }
-}
-
-const getChatsForCurrentUser = async (req, res) => {
-  const verifiedUserId = req.verifiedUser.id
+const getChatById = async (req, res) => {
+  const id = req.params.id;
 
   try {
-      const chats = await Chat.find({ users: { _id: verifiedUserId }}).populate('users', '-password')
+    const chat = await Chat.findOne({ _id: id }).populate('users', '-password');
+    res.status(200).json(chat);
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
+};
 
-      res.status(200).json(chats)
+const getChatsForCurrentUser = async (req, res) => {
+  const verifiedUserId = req.verifiedUser.id;
+
+  try {
+    const chats = await Chat.find({ users: { _id: verifiedUserId } }).populate('users', '-password');
+
+    res.status(200).json(chats);
   } catch (error) {
     res.status(400).json(error.message);
   }
 };
 
-
 module.exports = {
   getChatsForCurrentUser,
   createGroupChat,
   getChatById,
-  getOrCreateOneOnOneChat
+  getOrCreateOneOnOneChat,
 };
