@@ -59,11 +59,18 @@ const verifyUser = async (socket) => {
 io.on('connection', async (socket) => {
   console.log('connected');
 
+  // upon login
+  // create a room for the specific, single user so we can use that to send
+  // information to that user
+  socket.on('login', (user) => {
+    socket.join(user.id);
+    console.log(`You are logged in and connected and have joined room ${user.id} ! `);
+  });
+
   socket.on('join room', (room, user) => {
     socket.join(room);
 
     if (user) {
-      console.log(user.username + ' joined room: ' + room);
       socket.broadcast.to(room).emit('message', user.username + ' joined room: ' + room);
     }
   });
@@ -77,6 +84,15 @@ io.on('connection', async (socket) => {
 
     // Sending to all in room, even sender
     io.in(data.chat).emit('new message', fullMessage);
+  });
+
+  socket.on('create chat', async (data, authUser) => {
+    console.log(data);
+    console.log(authUser);
+    const users = data.users.filter((user) => user._id !== authUser.id);
+    users.forEach((user) => {
+      socket.to(user._id).emit('created chat', data);
+    });
   });
 
   socket.on('disconnect', () => {
