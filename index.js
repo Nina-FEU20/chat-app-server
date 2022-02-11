@@ -45,6 +45,9 @@ const io = new Server(server, {
 
 const verifyUser = async (socket) => {
   const token = socket.handshake.headers.cookie;
+
+  if (!token) return;
+
   const jwtToken = token.slice(4);
 
   const verifiedUser = await jwt.verify(jwtToken, process.env.JWT_SECRET);
@@ -54,34 +57,29 @@ const verifyUser = async (socket) => {
 };
 
 io.on('connection', async (socket) => {
-  const user = await verifyUser(socket);
-  console.log(`${user.username} logged in`);
+  console.log('connected');
 
-  socket.on('join room', (room) => {
+  socket.on('join room', (room, user) => {
     socket.join(room);
-    console.log(user.username + ' joined room: ' + room);
 
-    socket.broadcast.to(room).emit('message', user.username + ' joined room: ' + room);
+    if (user) {
+      console.log(user.username + ' joined room: ' + room);
+      socket.broadcast.to(room).emit('message', user.username + ' joined room: ' + room);
+    }
   });
 
-  socket.on('send message', async (message, chatId) => {
-    const newMessage = {
-      author: user._id,
-      content: message,
-      chat: chatId,
-    };
-
-    let createdMessage = await Message.create(newMessage);
-    const fullMessage = await Message.findById(createdMessage._id).populate('author', 'username');
+  socket.on('send message', async (data) => {
+    let createdMessage = await Message.create(data);
+    const fullMessage = await Message.findById(createdMessage._id).populate('author', 'username').populate('chat');
 
     // Sending to all in room except sender
     // socket.to(chatId).emit('new message', fullMessage);
 
     // Sending to all in room, even sender
-    io.in(chatId).emit('new message', fullMessage);
+    io.in(data.chat).emit('new message', fullMessage);
   });
 
   socket.on('disconnect', () => {
-    console.log('user left');
+    console.log(`disconnected`);
   });
 });
