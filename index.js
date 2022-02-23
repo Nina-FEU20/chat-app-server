@@ -6,7 +6,10 @@ const server = createServer(app);
 require('dotenv').config();
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+
 const connectDB = require('./config/connectDB');
+connectDB();
+
 const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const messageRoutes = require('./routes/messageRoutes');
@@ -15,8 +18,6 @@ const jwt = require('jsonwebtoken');
 const Message = require('./models/messageModel');
 const User = require('./models/userModel');
 const Chat = require('./models/chatModel');
-
-connectDB();
 
 app.use(cookieParser());
 app.use(express.json());
@@ -79,9 +80,6 @@ io.on('connection', async (socket) => {
     let createdMessage = await Message.create(data);
     const fullMessage = await Message.findById(createdMessage._id).populate('author', 'username').populate('chat');
 
-    // Sending to all in room except sender
-    // socket.to(chatId).emit('new message', fullMessage);
-
     // Sending to all in room, even sender
     io.in(data.chat).emit('new message', fullMessage);
   });
@@ -89,6 +87,7 @@ io.on('connection', async (socket) => {
   socket.on('create chat', async (data, authUser) => {
     console.log(data);
     console.log(authUser);
+
     const users = data.users.filter((user) => user._id !== authUser.id);
     users.forEach((user) => {
       socket.to(user._id).emit('created chat', data);
