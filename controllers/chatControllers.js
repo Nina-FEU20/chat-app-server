@@ -22,6 +22,7 @@ const getOrCreateOneOnOneChat = async (req, res) => {
       chatName: '',
       isGroupChat: false,
       users: [verifiedUserId, user._id],
+      lastMessage: null,
     };
 
     try {
@@ -50,6 +51,7 @@ const createGroupChat = async (req, res) => {
       chatName: req.body.name || '',
       users: users,
       isGroupChat: true,
+      lastMessage: null,
     });
 
     const fullGroupChat = await Chat.findOne({ _id: groupChat._id }).populate('users', '-password');
@@ -75,7 +77,9 @@ const getChatsForCurrentUser = async (req, res) => {
   const verifiedUserId = req.verifiedUser.id;
 
   try {
-    const chats = await Chat.find({ users: { _id: verifiedUserId } }).populate('users', '-password');
+    const chats = await Chat.find({ users: { _id: verifiedUserId } })
+      .populate('users', '-password')
+      .sort({ updatedAt: -1 });
 
     res.status(200).json(chats);
   } catch (error) {

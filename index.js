@@ -80,16 +80,16 @@ io.on('connection', async (socket) => {
     let createdMessage = await Message.create(data);
     const fullMessage = await Message.findById(createdMessage._id).populate('author', 'username').populate('chat');
 
+    await Chat.findByIdAndUpdate(fullMessage.chat._id, { lastMessage: fullMessage });
+
     // Sending to all in room, even sender
     io.in(data.chat).emit('new message', fullMessage);
   });
 
   socket.on('create chat', async (data, authUser) => {
-    console.log(data);
-    console.log(authUser);
-
     const users = data.users.filter((user) => user._id !== authUser.id);
     users.forEach((user) => {
+      console.log(user);
       socket.to(user._id).emit('created chat', data);
     });
   });
